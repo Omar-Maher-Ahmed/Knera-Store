@@ -1,82 +1,110 @@
 
-import Link from "next/link";
+"use client";
+
+import Image from "next/image";
+import { useCart } from "../../context/CartContext";
 
 export default function CartPage() {
+  const {
+    items,
+    subtotal,
+    removeFromCart,
+    increaseQuantity,
+    decreaseQuantity,
+  } = useCart();
+
+  if (items.length === 0) {
     return (
-        <section className="max-w-5xl mx-auto px-6">
-
-            {/* ================= Header ================= */}
-            <div className="text-center mb-24">
-                <h1 className="text-4xl font-bold mb-4">
-                    Your selected pieces
-                </h1>
-
-                <p className="text-muted max-w-lg mx-auto">
-                    A small collection of handmade items you connected with.
-                    Each one carries a story and a human touch.
-                </p>
-            </div>
-
-            {/* ================= Selected Items ================= */}
-            <div className="space-y-10 mb-32">
-
-                <div className="flex gap-8 items-center bg-white rounded-xl p-8 shadow-sm">
-                    <img
-                        src="/images/bag-1.jpg"
-                        className="w-32 h-32 object-cover rounded-lg"
-                    />
-
-                    <div className="flex-1">
-                        <h3 className="font-semibold mb-2">
-                            Sunflower Handmade Bag
-                        </h3>
-
-                        <p className="text-sm text-muted mb-4">
-                            Handmade crochet bag
-                        </p>
-
-                        <button className="text-sm text-red-500 hover:underline">
-                            Remove
-                        </button>
-                    </div>
-                </div>
-
-                <div className="flex gap-8 items-center bg-white rounded-xl p-8 shadow-sm">
-                    <img
-                        src="/images/macrame1.jpg"
-                        className="w-32 h-32 object-cover rounded-lg"
-                    />
-
-                    <div className="flex-1">
-                        <h3 className="font-semibold mb-2">
-                            Macramé Wall Art
-                        </h3>
-
-                        <p className="text-sm text-muted mb-4">
-                            Handmade home décor
-                        </p>
-
-                        <button className="text-sm text-red-500 hover:underline">
-                            Remove
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            {/* ================= Closing ================= */}
-            <div className="text-center mb-32">
-                <p className="text-muted mb-10">
-                    Pricing and availability are shared personally
-                    to keep each piece meaningful and unique.
-                </p>
-
-                <Link href="/shop" className="btn-primary">
-                    Continue Exploring
-                </Link>
-            </div>
-
-        </section>
+      <div className="text-center py-24">
+        <h2 className="text-2xl font-semibold mb-4">
+          Your cart is empty
+        </h2>
+      </div>
     );
-}
+  }
 
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+      {/* Products */}
+      <div className="lg:col-span-2 space-y-6">
+        {items.map((item) => (
+          <div key={item.id} className="flex gap-6 border-b pb-6">
+
+            <div className="relative w-28 aspect-square">
+              <Image
+                src={item.image}
+                alt={item.name}
+                fill
+                className="object-cover rounded"
+              />
+            </div>
+
+            <div className="flex-1">
+              <h3 className="font-medium">{item.name}</h3>
+
+              <p className="text-sm text-gray-600 mt-1">
+                ${item.price}
+              </p>
+
+              <p className="text-sm font-medium mt-2">
+                ${(item.price * item.quantity).toFixed(2)}
+              </p>
+
+              <div className="flex items-center gap-3 mt-4">
+                <button
+                  onClick={() => decreaseQuantity(item.id)}
+                  className="px-3 py-1 border"
+                >
+                  -
+                </button>
+
+                <span>{item.quantity}</span>
+
+                <button
+                  onClick={() => increaseQuantity(item.id)}
+                  className="px-3 py-1 border"
+                >
+                  +
+                </button>
+              </div>
+
+              <button
+                onClick={() => removeFromCart(item.id)}
+                className="text-sm text-red-500 mt-3"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Summary */}
+      <div className="border p-6 rounded-xl h-fit">
+        <h3 className="text-lg font-semibold mb-6">
+          Order Summary
+        </h3>
+
+        <div className="flex justify-between mb-2 text-sm text-gray-600">
+          <span>Subtotal</span>
+          <span>${subtotal.toFixed(2)}</span>
+        </div>
+
+        <div className="flex justify-between mb-2 text-sm text-gray-600">
+          <span>Shipping</span>
+          <span>Free</span>
+        </div>
+
+        <div className="flex justify-between font-semibold text-lg mt-4 border-t pt-4">
+          <span>Total</span>
+          <span>${subtotal.toFixed(2)}</span>
+        </div>
+
+        <button className="w-full bg-black text-white py-3 rounded-full mt-6 hover:bg-gray-800 transition">
+          Checkout
+        </button>
+      </div>
+    </div>
+  );
+}

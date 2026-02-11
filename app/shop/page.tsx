@@ -1,55 +1,109 @@
 
+"use client";
+
+import { useState, useMemo } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { products } from "../../data/products";
 
 const decorItems = [
-    { id: "d1", name: "Macramé Wall Art", image: "/images/macrame1.jpg" },
-    { id: "d2", name: "Macramé Hanging", image: "/images/macrame2.jpg" },
-    { id: "d3", name: "Handmade Mirror", image: "/images/mirror.jpg" },
-    { id: "d4", name: "Calm Handmade Room", image: "/images/room.jpg" },
+  { id: "d1", name: "Macramé Wall Art", image: "/images/macrame1.jpg", price: 80 },
+  { id: "d2", name: "Macramé Hanging", image: "/images/macrame2.jpg", price: 65 },
+  { id: "d3", name: "Handmade Mirror", image: "/images/mirror.jpg", price: 120 },
+  { id: "d4", name: "Calm Handmade Room", image: "/images/room.jpg", price: 95 },
 ];
 
 export default function ShopPage() {
-    return (
-        <section className="max-w-6xl mx-auto px-6">
+  const allItems = [...products, ...decorItems];
 
-            <div className="mb-32 text-center">
-                <h1 className="text-5xl font-bold mb-6">
-                    The Collection
-                </h1>
-                <p className="text-muted max-w-xl mx-auto">
-                    A curated selection of handmade pieces,
-                    created slowly and thoughtfully.
-                </p>
-            </div>
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("default");
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-32">
-
-                {[...products, ...decorItems].map((item: any, i) => (
-                    <Link
-                        key={i}
-                        href={item.id ? `/product/${item.id}` : "#"}
-                        className="group block"
-                    >
-                        <img
-                            src={item.image}
-                            className="h-[420px] w-full object-cover rounded-xl
-              group-hover:scale-[1.03] transition duration-500"
-                        />
-
-                        <div className="mt-4">
-                            <h3 className="font-medium text-lg">
-                                {item.name}
-                            </h3>
-                            <p className="text-sm text-muted">
-                                Handmade Piece
-                            </p>
-                        </div>
-                    </Link>
-                ))}
-
-            </div>
-
-        </section>
+  const filteredItems = useMemo(() => {
+    let filtered = allItems.filter((item) =>
+      item.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    if (sort === "low") {
+      filtered = [...filtered].sort((a, b) => a.price - b.price);
+    }
+
+    if (sort === "high") {
+      filtered = [...filtered].sort((a, b) => b.price - a.price);
+    }
+
+    return filtered;
+  }, [search, sort]);
+
+  return (
+    <section className="space-y-16">
+
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+          The Collection
+        </h1>
+        <p className="text-gray-600 max-w-xl mx-auto">
+          A curated selection of handmade pieces created thoughtfully.
+        </p>
+      </div>
+
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row gap-4 md:justify-between">
+
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-4 py-2 rounded w-full md:w-1/3"
+        />
+
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="border px-4 py-2 rounded w-full md:w-48"
+        >
+          <option value="default">Default</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+        </select>
+
+      </div>
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+        {filteredItems.map((item) => (
+          <Link
+            key={item.id}
+            href={typeof item.id === "string" ? "#" : `/product/${item.id}`}
+            className="group block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition"
+          >
+            <div className="relative aspect-[4/5] w-full">
+              <Image
+                src={item.image}
+                alt={item.name}
+                fill
+                className="object-cover group-hover:scale-105 transition duration-500"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            </div>
+
+            <div className="p-5 space-y-1">
+              <h3 className="font-medium text-lg">{item.name}</h3>
+              <p className="text-sm text-gray-600">${item.price}</p>
+            </div>
+          </Link>
+        ))}
+
+      </div>
+
+      {filteredItems.length === 0 && (
+        <p className="text-center text-gray-500">
+          No products found.
+        </p>
+      )}
+    </section>
+  );
 }
